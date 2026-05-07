@@ -1,13 +1,297 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>contact-system</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeadStrike | Outreach Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@500;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --accent: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --border: rgba(148, 163, 184, 0.1);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Layout */
+        .app-container { display: flex; height: 100vh; }
+        
+        .sidebar {
+            width: 280px;
+            background: rgba(15, 23, 42, 0.95);
+            border-right: 1px solid var(--border);
+            padding: 40px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.05), transparent);
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-list { list-style: none; }
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .nav-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-item:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .section-header { margin-bottom: 32px; }
+        .section-header h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin-bottom: 8px; }
+        .section-header p { color: var(--text-muted); }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; padding: 16px; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+        td { padding: 20px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-active { background: rgba(16, 185, 129, 0.1); color: var(--accent); }
+        .status-responded { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+
+        /* Inputs */
+        .search-hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        .input-group { display: flex; gap: 16px; flex: 1; margin-right: 20px; }
+        input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 12px 20px;
+            border-radius: 12px;
+            color: white;
+            flex: 1;
+            outline: none;
+        }
+        input:focus { border-color: var(--primary); }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+
+        /* Hide Views */
+        .view { display: none; }
+        .view.active { display: block; }
+
+        .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <i data-lucide="zap" color="var(--primary)"></i>
+                LeadStrike
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item active" onclick="showView('dashboard')">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </li>
+                <li class="nav-item" onclick="showView('hunt')">
+                    <i data-lucide="search"></i> Initiate Hunt
+                </li>
+                <li class="nav-item" onclick="showView('strikezone')">
+                    <i data-lucide="crosshair"></i> Strike Zone
+                </li>
+                <li class="nav-item" onclick="showView('database')">
+                    <i data-lucide="database"></i> Master Database
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <!-- Dashboard View -->
+            <section id="dashboard" class="view active">
+                <div class="section-header">
+                    <h1>Command Center</h1>
+                    <p>Welcome back, Rhys. Your outreach engine is running.</p>
+                </div>
+                <div class="glass-card" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; text-align: center;">
+                    <div>
+                        <h2 style="font-size: 3rem; color: var(--primary)">12</h2>
+                        <p style="color: var(--text-muted)">Active Strikes</p>
+                    </div>
+                    <div>
+                        <h2 style="font-size: 3rem; color: var(--accent)">84</h2>
+                        <p style="color: var(--text-muted)">Emails Sent</p>
+                    </div>
+                    <div>
+                        <h2 style="font-size: 3rem; color: var(--warning)">32%</h2>
+                        <p style="color: var(--text-muted)">Response Rate</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Hunt View -->
+            <section id="hunt" class="view">
+                <div class="section-header">
+                    <h1>Initiate The Hunt</h1>
+                    <p>Enter parameters to scan for new business leads.</p>
+                </div>
+                <div class="search-hero glass-card">
+                    <div class="input-group">
+                        <input type="text" id="huntNiche" placeholder="Niche (e.g. Plumbers)">
+                        <input type="text" id="huntLocation" placeholder="Location (e.g. London)">
+                    </div>
+                    <button class="btn btn-primary" onclick="performHunt()">
+                        <i data-lucide="zap"></i> Scan Area
+                    </button>
+                </div>
+                <div class="results-grid" id="huntResults">
+                    <!-- Results appear here -->
+                </div>
+            </section>
+
+            <!-- Strike Zone View -->
+            <section id="strikezone" class="view">
+                <div class="section-header">
+                    <h1>Strike Zone</h1>
+                    <p>Manage your active automated follow-up sequences.</p>
+                </div>
+                <div class="glass-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Business</th>
+                                <th>Contact</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="strikeList">
+                            <!-- Strikes appear here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Database View -->
+            <section id="database" class="view">
+                <div class="section-header">
+                    <h1>Master Database</h1>
+                    <p>A full HTML view of all intelligence gathered.</p>
+                </div>
+                <div class="glass-card" id="masterDataView">
+                    <!-- Database content appears here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // View Switcher
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // API URL (Relative to make it work with ngrok/web)
+        const API_URL = '';
+
+        async function performHunt() {
+            const niche = document.getElementById('huntNiche').value;
+            const loc = document.getElementById('huntLocation').value;
+            const resultsDiv = document.getElementById('huntResults');
+            resultsDiv.innerHTML = '<p>Deep Hunting for Emails...</p>';
+
+            try {
+                const response = await fetch(`/api/hunt?niche=${niche}&location=${loc}`);
+                const data = await response.json();
+                resultsDiv.innerHTML = '';
+                data.leads.forEach(lead => {
+                    const card = document.createElement('div');
+                    card.className = 'glass-card';
+                    card.innerHTML = `
+                        <h3>${lead.name}</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 8px 0;">${lead.website}</p>
+                        <button class="btn btn-primary" style="width: 100%; margin-top: 12px;" onclick='addToStrike(${JSON.stringify(lead)})'>Add to Strike Zone</button>
+                    `;
+                    resultsDiv.appendChild(card);
+                });
+            } catch (err) {
+                resultsDiv.innerHTML = '<p>Error connecting to Engine. Is the server running?</p>';
+            }
+        }
+
+        // Add more logic here as needed...
+    </script>
+</body>
 </html>
