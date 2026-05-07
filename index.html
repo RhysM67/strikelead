@@ -8,32 +8,35 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --primary: #3b82f6;
+            --primary: #8b5cf6;
+            --primary-glow: rgba(139, 92, 246, 0.4);
             --accent: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --bg: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --border: rgba(148, 163, 184, 0.1);
+            --bg-dark: #020617;
+            --bg-card: rgba(15, 23, 42, 0.6);
+            --border: rgba(255, 255, 255, 0.08);
             --text: #f8fafc;
             --text-muted: #94a3b8;
+            --glass-blur: blur(16px);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: 'Inter', sans-serif; 
-            background: var(--bg); 
+            background: var(--bg-dark); 
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
             color: var(--text); 
             line-height: 1.6;
-            overflow-x: hidden;
+            min-height: 100vh;
         }
 
-        /* Layout */
         .app-container { display: flex; height: 100vh; }
         
         .sidebar {
             width: 280px;
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: var(--glass-blur);
             border-right: 1px solid var(--border);
             padding: 40px 24px;
             display: flex;
@@ -45,108 +48,126 @@
             flex: 1;
             padding: 40px;
             overflow-y: auto;
-            background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.05), transparent);
         }
 
         .logo {
             font-family: 'Outfit', sans-serif;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: 900;
-            letter-spacing: -0.02em;
+            color: white;
             display: flex;
             align-items: center;
             gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .nav-list { list-style: none; }
         .nav-item {
-            padding: 12px 16px;
-            border-radius: 12px;
+            padding: 14px 20px;
+            border-radius: 14px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             gap: 12px;
             color: var(--text-muted);
             margin-bottom: 8px;
+            border: 1px solid transparent;
         }
 
         .nav-item.active {
-            background: rgba(59, 130, 246, 0.1);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.05));
             color: var(--primary);
+            border-color: rgba(139, 92, 246, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
 
         .nav-item:hover:not(.active) {
             background: rgba(255, 255, 255, 0.05);
-            color: var(--text);
-        }
-
-        /* Glass Cards */
-        .glass-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 32px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .section-header { margin-bottom: 32px; }
-        .section-header h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin-bottom: 8px; }
-        .section-header p { color: var(--text-muted); }
-
-        /* Tables */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 16px; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
-        td { padding: 20px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        .status-active { background: rgba(16, 185, 129, 0.1); color: var(--accent); }
-        .status-responded { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
-
-        /* Inputs */
-        .search-hero {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-        }
-        .input-group { display: flex; gap: 16px; flex: 1; margin-right: 20px; }
-        input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-            padding: 12px 20px;
-            border-radius: 12px;
             color: white;
-            flex: 1;
-            outline: none;
         }
-        input:focus { border-color: var(--primary); }
+
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 32px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s;
+        }
+
+        .section-header h1 { 
+            font-family: 'Outfit', sans-serif; 
+            font-size: 2.5rem; 
+            font-weight: 800;
+            background: linear-gradient(to bottom right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px; 
+        }
 
         .btn {
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 600;
+            padding: 14px 28px;
+            border-radius: 16px;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
-            border: none;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            border: 1px solid transparent;
+            font-size: 0.9rem;
         }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
 
-        /* Hide Views */
-        .view { display: none; }
-        .view.active { display: block; }
+        .btn-primary { 
+            background: var(--primary); 
+            color: white; 
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px var(--primary-glow);
+        }
 
-        .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .stat-card {
+            text-align: center;
+            padding: 40px;
+            border: 1px solid rgba(139, 92, 246, 0.1);
+        }
+        .stat-value {
+            font-size: 3.5rem;
+            font-weight: 900;
+            font-family: 'Outfit', sans-serif;
+            color: var(--primary);
+            text-shadow: 0 0 20px var(--primary-glow);
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+        th { text-align: left; padding: 16px; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; }
+        td { 
+            padding: 20px; 
+            background: rgba(255, 255, 255, 0.02);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        td:first-child { border-left: 1px solid var(--border); border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
+        td:last-child { border-right: 1px solid var(--border); border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+
+        .strategy-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
@@ -261,37 +282,60 @@
             document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
             event.currentTarget.classList.add('active');
-        }
-
-        // API URL (Relative to make it work with ngrok/web)
-        const API_URL = '';
-
-        async function performHunt() {
-            const niche = document.getElementById('huntNiche').value;
-            const loc = document.getElementById('huntLocation').value;
-            const resultsDiv = document.getElementById('huntResults');
-            resultsDiv.innerHTML = '<p>Deep Hunting for Emails...</p>';
-
-            try {
-                const response = await fetch(`/api/hunt?niche=${niche}&location=${loc}`);
-                const data = await response.json();
-                resultsDiv.innerHTML = '';
-                data.leads.forEach(lead => {
-                    const card = document.createElement('div');
-                    card.className = 'glass-card';
-                    card.innerHTML = `
-                        <h3>${lead.name}</h3>
-                        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 8px 0;">${lead.website}</p>
-                        <button class="btn btn-primary" style="width: 100%; margin-top: 12px;" onclick='addToStrike(${JSON.stringify(lead)})'>Add to Strike Zone</button>
-                    `;
-                    resultsDiv.appendChild(card);
-                });
-            } catch (err) {
-                resultsDiv.innerHTML = '<p>Error connecting to Engine. Is the server running?</p>';
+            
+            if (viewId === 'database' || viewId === 'strikezone') {
+                loadData();
             }
         }
 
-        // Add more logic here as needed...
+        async function loadData() {
+            try {
+                const response = await fetch('/api/leads');
+                const leads = await response.json();
+                
+                // Update Strike Zone
+                const strikeList = document.getElementById('strikeList');
+                strikeList.innerHTML = '';
+                leads.filter(l => l.status === 'active' || l.status === 'responded').forEach(lead => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${lead.name}</strong></td>
+                        <td>${lead.email || 'N/A'}</td>
+                        <td><span class="status-badge status-${lead.status}">${lead.status}</span></td>
+                        <td><button class="btn btn-ghost" onclick="stopSequence('${lead.id}')">Stop</button></td>
+                    `;
+                    strikeList.appendChild(row);
+                });
+
+                // Update Database
+                const dbView = document.getElementById('masterDataView');
+                dbView.innerHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Target</th>
+                                <th>Contact</th>
+                                <th>AI Strategy</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${leads.map(l => `
+                                <tr>
+                                    <td><strong>${l.name}</strong></td>
+                                    <td>${l.email || 'N/A'}</td>
+                                    <td><div class="strategy-tag">${l.strategy || 'Strike'}</div></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (err) {
+                console.error('Failed to load data:', err);
+            }
+        }
+
+        // Run once on load
+        loadData();
     </script>
 </body>
 </html>
