@@ -288,49 +288,115 @@
             }
         }
 
+        // Detect if we are running locally or on the web
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:3002' 
+            : '';
+
         async function loadData() {
             try {
-                const response = await fetch('/api/leads');
+                const response = await fetch(`${API_URL}/api/leads`);
                 const leads = await response.json();
                 
                 // Update Strike Zone
                 const strikeList = document.getElementById('strikeList');
-                strikeList.innerHTML = '';
-                leads.filter(l => l.status === 'active' || l.status === 'responded').forEach(lead => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><strong>${lead.name}</strong></td>
-                        <td>${lead.email || 'N/A'}</td>
-                        <td><span class="status-badge status-${lead.status}">${lead.status}</span></td>
-                        <td><button class="btn btn-ghost" onclick="stopSequence('${lead.id}')">Stop</button></td>
-                    `;
-                    strikeList.appendChild(row);
-                });
+                if (strikeList) {
+                    strikeList.innerHTML = '';
+                    leads.filter(l => l.status === 'active' || l.status === 'responded').forEach(lead => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td><strong>${lead.name}</strong></td>
+                            <td>${lead.email || 'N/A'}</td>
+                            <td><span class="status-badge status-${lead.status}">${lead.status}</span></td>
+                            <td><button class="btn btn-ghost" onclick="handleStopSequence('${lead.id}')">Stop</button></td>
+                        `;
+                        strikeList.appendChild(row);
+                    });
+                }
 
                 // Update Database
                 const dbView = document.getElementById('masterDataView');
-                dbView.innerHTML = `
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Target</th>
-                                <th>Contact</th>
-                                <th>AI Strategy</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${leads.map(l => `
+                if (dbView) {
+                    dbView.innerHTML = `
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td><strong>${l.name}</strong></td>
-                                    <td>${l.email || 'N/A'}</td>
-                                    <td><div class="strategy-tag">${l.strategy || 'Strike'}</div></td>
+                                    <th>Target</th>
+                                    <th>Contact</th>
+                                    <th>AI Strategy</th>
                                 </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
+                            </thead>
+                            <tbody>
+                                ${leads.map(l => `
+                                    <tr>
+                                        <td><strong>${l.name}</strong></td>
+                                        <td>${l.email || 'N/A'}</td>
+                                        <td><div class="strategy-tag">${l.strategy || 'Strike'}</div></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                }
             } catch (err) {
                 console.error('Failed to load data:', err);
+            }
+        }
+
+        async function handleStopSequence(leadId) {
+            try {
+                await fetch(`${API_URL}/api/stop-sequence`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ leadId })
+                });
+                loadData();
+            } catch (err) {
+                console.error('Failed to stop:', err);
+            }
+        }
+
+        async function performHunt() {
+            const niche = document.getElementById('huntNiche').value;
+            const loc = document.getElementById('huntLocation').value;
+            const resultsDiv = document.getElementById('huntResults');
+            if (!resultsDiv) return;
+            
+            resultsDiv.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--primary);">🛰️ Deep Hunting for Emails...</p>';
+
+            try {
+                const response = await fetch(`${API_URL}/api/hunt?niche=${niche}&location=${loc}`);
+                const data = await response.json();
+                resultsDiv.innerHTML = '';
+                data.leads.forEach(lead => {
+                    const card = document.createElement('div');
+                    card.className = 'glass-card';
+                    card.innerHTML = `
+                        <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.1rem; margin-bottom: 8px;">${lead.name}</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">${lead.website}</p>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 16px;">
+                            <div style="display: flex; align-items: center; gap: 6px;"><i data-lucide="phone" size="12"></i> ${lead.phone || 'N/A'}</div>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%;" onclick='addToStrike(${JSON.stringify(lead)})'>Add to Strike Zone</button>
+                    `;
+                    resultsDiv.appendChild(card);
+                });
+                lucide.createIcons();
+            } catch (err) {
+                resultsDiv.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px;">❌ Error connecting to Engine. Make sure the server is running.</p>';
+            }
+        }
+
+        async function addToStrike(lead) {
+            try {
+                await fetch(`${API_URL}/api/leads`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lead })
+                });
+                alert('Lead added to Strike Zone!');
+            } catch (err) {
+                console.error('Failed to add lead:', err);
             }
         }
 
